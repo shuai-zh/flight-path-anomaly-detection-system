@@ -4,7 +4,7 @@
 
 You must have [NuPIC](https://github.com/numenta/nupic) installed. Please follow the installation instructions there.
 
-Now, install the other python requirements for this application:
+Now, use [pip](https://pip.pypa.io/en/latest/installing.html) to install the other python requirements for this application:
 
     pip install -r requirements.txt
     
