@@ -40,16 +40,16 @@ MODEL_PARAMS = {
             # if > 0: sensor region will print out on screen what it's sensing
             # at each step 0: silent; >=1: some info; >=2: more info;
             # >=3: even more info (see compute() in py/regions/RecordSensor.py)
-            'verbosity' : 0,
+            'verbosity': 0,
 
             # Example:
-            #     dsEncoderSchema = [
+            # dsEncoderSchema = [
             #       DeferredDictLookup('__field_name_encoder'),
             #     ],
             #
             # (value generated from DS_ENCODER_SCHEMA)
             'encoders': {
-                u'vector':    {
+                u'vector': {
                     'fieldname': u'vector',
                     'n': 2048,
                     'w': 51,
@@ -69,7 +69,7 @@ MODEL_PARAMS = {
             #  days, hours, minutes, seconds, milliseconds, microseconds, weeks
             #
             # Example for 1.5 days: sensorAutoReset = dict(days=1,hours=12),
-            'sensorAutoReset' : None,
+            'sensorAutoReset': None,
         },
 
         'spEnable': True,
@@ -77,11 +77,11 @@ MODEL_PARAMS = {
         'spParams': {
             # SP diagnostic output verbosity control;
             # 0: silent; >=1: some info; >=2: more info;
-            'spVerbosity' : 0,
+            'spVerbosity': 0,
 
             # Spatial Pooler implementation selector.
             # Options: 'py', 'cpp' (speed optimized, new)
-            'spatialImp' : 'cpp', 
+            'spatialImp': 'cpp',
 
             'globalInhibition': 1,
 
@@ -119,7 +119,7 @@ MODEL_PARAMS = {
         # TP is necessary for making temporal predictions, such as predicting
         # the next inputs.  Without TP, the model is only capable of
         # reconstructing missing sensor inputs (via SP).
-        'tpEnable' : True,
+        'tpEnable': True,
 
         'tpParams': {
             # TP diagnostic output verbosity control;
@@ -150,7 +150,7 @@ MODEL_PARAMS = {
             'newSynapseCount': 20,
 
             # Maximum number of synapses per segment
-            #  > 0 for fixed-size CLA
+            # > 0 for fixed-size CLA
             # -1 for non-fixed-size CLA
             #
             # TODO: for Ron: once the appropriate value is placed in TP
@@ -180,7 +180,7 @@ MODEL_PARAMS = {
             # Permanence Decrement
             # If set to None, will automatically default to tpPermanenceInc
             # value.
-            'permanenceDec' : 0.1,
+            'permanenceDec': 0.1,
 
             'globalDecay': 0.0,
 
@@ -212,9 +212,10 @@ MODEL_PARAMS = {
         'clEnable': False,
         'clParams': None,
 
-        'anomalyParams': {  u'anomalyCacheRecords': None,
-    u'autoDetectThreshold': None,
-    u'autoDetectWaitRecords': 2184},
+        'anomalyParams': {
+            u'anomalyCacheRecords': None,
+            u'autoDetectThreshold': None,
+            u'autoDetectWaitRecords': 2184},
 
         'trainSPNetOnlyIfRequested': False,
     },
