@@ -8,7 +8,7 @@ Now, install the other python requirements for this application:
 
     pip install -r requirements.txt
     
-And also install the bower components:
+And also install the [bower](http://bower.io/#install-bower) components:
     
     bower install
 
