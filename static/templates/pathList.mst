@@ -1,0 +1,17 @@
+<div class="ui top attached segment">
+    <div class="ui divided selection list">
+        {{#paths}}
+        <div class="link item">
+             <i class="map marker icon"></i>
+
+            <div class="content">
+                <a class="header" data-index="{{ number }}">Path #{{ number }}
+                    {{#show}}
+                        <i class="checkmark icon"></i>
+                    {{/show}}
+                </a>
+            </div>
+        </div>
+        {{/paths}}
+    </div>
+</div>

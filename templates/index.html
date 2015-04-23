@@ -1,0 +1,66 @@
+{% extends "layout/layout.html" %}
+{% block styles %}
+
+{% endblock %}
+
+{% block navbar %}
+    <nav class="ui menu inverted navbar page grid" style="margin-bottom: 0px">
+        <a href="" class="brand item">Drone Anomaly Detection</a>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="ui grid">
+        <div class="row">
+            <div class="column padding-reset">
+                <div class="ui huge message page grid">
+                    <h1 class="ui huge header">Drone Anomaly Detection</h1>
+
+                    <p>This is a template for a simple marketing or informational website. It includes a large callout
+                        called a jumbotron and three supporting pieces of content. Use it as a starting point to create
+                        something more unique.</p>
+                    <a class="ui blue button" href="{{ url_for('simulate') }}">Get started &raquo;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui hidden divider"></div>
+    <div class="ui page grid">
+        <div class="three column row">
+            <div class="column">
+                <h2 class="ui header">Heading</h2>
+
+                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor
+                    mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna
+                    mollis euismod. Donec sed odio dui.</p>
+                <button class="ui tiny button m-top-10">View details &raquo;</button>
+            </div>
+            <div class="column">
+                <h2 class="ui header">Heading</h2>
+
+                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor
+                    mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna
+                    mollis euismod. Donec sed odio dui.</p>
+                <button class="ui tiny button m-top-10">View details &raquo;</button>
+            </div>
+            <div class="column">
+                <h2 class="ui header">Heading</h2>
+
+                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor
+                    mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna
+                    mollis euismod. Donec sed odio dui.</p>
+                <button class="ui tiny button m-top-10">View details &raquo;</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <div class="ui divider"></div>
+                <span>&copy; Shuai Zhang 2015</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
