@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 
-from nupic.geospatial_anomaly import runGeospatialAnomaly
+from htm.geospatial_anomaly import runGeospatialAnomaly
 
 
 app = Flask(__name__)

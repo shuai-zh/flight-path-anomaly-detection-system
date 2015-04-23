@@ -97,14 +97,6 @@ def runGeospatialAnomaly(preprocessedData,
             result = model.run(modelInput)
             anomalyScore = result.inferences["anomalyScore"]
 
-            # processedData.append({
-            # 'timestamp': timestamp.strftime(outputFormat),
-            # 'longitude': longitude,
-            # 'latitude': latitude,
-            # 'speed': speed,
-            # 'anomalyScore': anomalyScore,
-            # 'sequence': index[0]})
-            # record['flightPath'][index1[0]]['anomalyScore'] = anomalyScore
             anomalyScores.append(anomalyScore)
 
             if verbose:
