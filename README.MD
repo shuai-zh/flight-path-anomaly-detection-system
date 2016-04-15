@@ -19,3 +19,5 @@ To run, simply start the web server from the command line:
     python server.py
 
 This will start a web server and load some initial sample data for viewing. Open `http://localhost:3000` in your browser to use this application.
+
+Test
