@@ -3,97 +3,210 @@
     <link rel="stylesheet" href="{{ url_for('static',filename='lib/Cesium/Widgets/widgets.css') }}">
 {% endblock %}
 {% block content %}
-    <div id="cesiumContainer"></div>
-    <div id="pathList"></div>
+    <div id="wrapper" class="dimmable blurring">
+        <div id="cesiumContainer"></div>
+        <div id="pathList"></div>
 
-    <div id="pageDimmer" class="ui page dimmer">
-        <div class="content">
-            <div class="ui large text loader">Processing...</div>
-        </div>
-    </div>
-
-    <div id="modalSimulateConfig" class="ui modal">
-        <div class="header">
-            Simulation Configuration
-        </div>
-        <div class="content">
-            <form class="ui form" id="simulationConfigurationForm">
-                <h4 class="ui dividing header">Drone Performance</h4>
-
-                <div class="field">
-                    <label>Cruising Speed (m/s)</label>
-
-                    <div class="field">
-                        <input type="number" name="droneCruisingSpeed" placeholder="Speed" required="" value="100">
-                    </div>
-
-                </div>
-
-                <div class="field">
-                    <label>Cruising Altitude (m)</label>
-
-                    <div class="field">
-                        <input type="number" name="droneCruisingAltitude" placeholder="Cruising Altitude" required=""
-                               value="10000">
-                    </div>
-
-                </div>
-
-                <h4 class="ui dividing header">Wind Effect</h4>
-
-                <div class="three fields">
-                    <div class="field">
-                        <label>Probability of Wind on X (1 - 10)</label>
-                        <input type="number" name="probabilityOfWindOnX" placeholder="Probability of Wind on X" min="1"
-                               max="10" required="" value="2">
-                    </div>
-                    <div class="field">
-                        <label>Probability of Wind on Y (1 - 10)</label>
-                        <input type="number" name="probabilityOfWindOnY" placeholder="Probability of Wind on Y" min="1"
-                               max="10" required="" value="2">
-                    </div>
-                    <div class="field">
-                        <label>Probability of Wind on Z (1 - 10)</label>
-                        <input type="number" name="probabilityOfWindOnZ" placeholder="Probability of Wind on Z" min="1"
-                               max="10" required="" value="1">
-                    </div>
-                </div>
-
-                <div class="three fields">
-                    <div class="field">
-                        <label>Max Wind Speed on X (m/s)</label>
-                        <input type="number" name="maxWindSpeedOnX" placeholder="Max Wind Speed on X" min="1" max="55"
-                               required="" value="107">
-                    </div>
-                    <div class="field">
-                        <label>Max Wind Speed on Y (m/s)</label>
-                        <input type="number" name="maxWindSpeedOnY" placeholder="Max Wind Speed on Y" min="1" max="55"
-                               required="" value="107">
-                    </div>
-                    <div class="field">
-                        <label>Max Wind Speed on Z (m/s)</label>
-                        <input type="number" name="maxWindSpeedOnZ" placeholder="Max Wind Speed on Z" min="1" max="55"
-                               required="" value="107">
-                    </div>
-                </div>
-
-
-                <div class="ui hidden divider">
-                </div>
-
-                <div class="ui error message">
-                    <div class="header">We noticed some issues</div>
-                </div>
-
-            </form>
-        </div>
-        <div class="actions">
-            <div class="ui black button">
-                Cancel
+        <div id="modalSimulateConfig" class="ui modal">
+            <div class="header">
+                Simulation Configuration
             </div>
-            <div class="ui positive right labeled icon button" id="btnSimulate">
-                Simulate
-                <i class="plane icon"></i>
+            <div class="content">
+                <form class="ui form" id="simulationConfigurationForm">
+                    <h4 class="ui dividing header">Trip Information</h4>
+                    <div class="two fields">
+                        <div class="field">
+                            <label>From</label>
+                            <select id="dlFrom" name="from" class="ui search fluid dropdown"></select>
+                        </div>
+                        <div class="field">
+                            <label>To</label>
+                            <select id="dlTo" name="to" class="ui search fluid dropdown"></select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Numbers of simulated paths</label>
+                        <input type="number" name="numberOfPaths" min="1" value="10">
+                    </div>
+                    <h4 class="ui dividing header">Plane Performance</h4>
+
+                    <div class="field">
+                        <label>Cruising Speed (m/s)</label>
+
+                        <div class="field">
+                            <input type="number" name="planeCruisingSpeed" placeholder="Speed" required="" value="100">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Cruising Altitude (m)</label>
+
+                        <div class="field">
+                            <input type="number" name="planeCruisingAltitude" placeholder="Cruising Altitude"
+                                   required=""
+                                   value="10000">
+                        </div>
+
+                    </div>
+
+                    <h4 class="ui dividing header">Wind Effect</h4>
+
+                    <div class="three fields">
+                        <div class="field">
+                            <label>Probability of Wind on X (1 - 10)</label>
+                            <input type="number" name="probabilityOfWindOnX" placeholder="Probability of Wind on X"
+                                   min="1"
+                                   max="10" required="" value="2">
+                        </div>
+                        <div class="field">
+                            <label>Probability of Wind on Y (1 - 10)</label>
+                            <input type="number" name="probabilityOfWindOnY" placeholder="Probability of Wind on Y"
+                                   min="1"
+                                   max="10" required="" value="2">
+                        </div>
+                        <div class="field">
+                            <label>Probability of Wind on Z (1 - 10)</label>
+                            <input type="number" name="probabilityOfWindOnZ" placeholder="Probability of Wind on Z"
+                                   min="1"
+                                   max="10" required="" value="1">
+                        </div>
+                    </div>
+
+                    <div class="three fields">
+                        <div class="field">
+                            <label>Max Wind Speed on X (m/s)</label>
+                            <input type="number" name="maxWindSpeedOnX" placeholder="Max Wind Speed on X" min="1"
+                                   max="55"
+                                   required="" value="107">
+                        </div>
+                        <div class="field">
+                            <label>Max Wind Speed on Y (m/s)</label>
+                            <input type="number" name="maxWindSpeedOnY" placeholder="Max Wind Speed on Y" min="1"
+                                   max="55"
+                                   required="" value="107">
+                        </div>
+                        <div class="field">
+                            <label>Max Wind Speed on Z (m/s)</label>
+                            <input type="number" name="maxWindSpeedOnZ" placeholder="Max Wind Speed on Z" min="1"
+                                   max="55"
+                                   required="" value="107">
+                        </div>
+                    </div>
+
+
+                    <div class="ui hidden divider">
+                    </div>
+
+                    <div class="ui error message">
+                        <div class="header">We noticed some issues</div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="actions">
+                <div class="ui black cancel button">
+                    Cancel
+                </div>
+                <div class="ui positive right labeled icon button" id="btnSimulate">
+                    Simulate
+                    <i class="plane icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalAnomalousDataConfig" class="ui modal">
+            <div class="header">
+                Anomalous Path Configuration
+            </div>
+            <div class="content">
+                <form class="ui form" id="anomalousDataForm">
+                    <div class="field">
+                        <label>Numbers of simulated paths</label>
+                        <input type="number" name="numberOfPaths" min="1" value="1">
+                    </div>
+                    <h4 class="ui dividing header">Plane Performance</h4>
+
+                    <div class="field">
+                        <label>Cruising Speed (m/s)</label>
+
+                        <div class="field">
+                            <input type="number" name="planeCruisingSpeed" placeholder="Speed" required="" value="100">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Cruising Altitude (m)</label>
+
+                        <div class="field">
+                            <input type="number" name="planeCruisingAltitude" placeholder="Cruising Altitude"
+                                   required=""
+                                   value="10000">
+                        </div>
+
+                    </div>
+
+                    <h4 class="ui dividing header">Wind Effect</h4>
+
+                    <div class="three fields">
+                        <div class="field">
+                            <label>Probability of Wind on X (1 - 10)</label>
+                            <input type="number" name="probabilityOfWindOnX" placeholder="Probability of Wind on X"
+                                   min="1"
+                                   max="10" required="" value="2">
+                        </div>
+                        <div class="field">
+                            <label>Probability of Wind on Y (1 - 10)</label>
+                            <input type="number" name="probabilityOfWindOnY" placeholder="Probability of Wind on Y"
+                                   min="1"
+                                   max="10" required="" value="2">
+                        </div>
+                        <div class="field">
+                            <label>Probability of Wind on Z (1 - 10)</label>
+                            <input type="number" name="probabilityOfWindOnZ" placeholder="Probability of Wind on Z"
+                                   min="1"
+                                   max="10" required="" value="1">
+                        </div>
+                    </div>
+
+                    <div class="three fields">
+                        <div class="field">
+                            <label>Max Wind Speed on X (m/s)</label>
+                            <input type="number" name="maxWindSpeedOnX" placeholder="Max Wind Speed on X" min="1"
+                                   max="55"
+                                   required="" value="107">
+                        </div>
+                        <div class="field">
+                            <label>Max Wind Speed on Y (m/s)</label>
+                            <input type="number" name="maxWindSpeedOnY" placeholder="Max Wind Speed on Y" min="1"
+                                   max="55"
+                                   required="" value="107">
+                        </div>
+                        <div class="field">
+                            <label>Max Wind Speed on Z (m/s)</label>
+                            <input type="number" name="maxWindSpeedOnZ" placeholder="Max Wind Speed on Z" min="1"
+                                   max="55"
+                                   required="" value="107">
+                        </div>
+                    </div>
+
+
+                    <div class="ui hidden divider">
+                    </div>
+
+                    <div class="ui error message">
+                        <div class="header">We noticed some issues</div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="actions">
+                <div class="ui black cancel button">
+                    Cancel
+                </div>
+                <div class="ui right labeled icon ok button" id="btnSimulateAnomalousData">
+                    Simulate
+                    <i class="plane icon"></i>
+                </div>
             </div>
         </div>
     </div>

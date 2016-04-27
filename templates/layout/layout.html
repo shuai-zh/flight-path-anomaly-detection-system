@@ -2,35 +2,43 @@
 <html>
 <head>
     {% if title %}
-        <title>{{ title }} - Drone Anomaly Detection</title>
+        <title>{{ title }} - FPADS</title>
     {% else %}
-        <title>Drone Anomaly Detection</title>
+        <title>Flight Path Anomaly Detection System</title>
     {% endif %}
 
     <meta name="description" content="">
     <meta name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" href="{{ url_for('static',filename='vendor/semantic-ui/dist/semantic.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='vendor/semantic/dist/semantic.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static',filename='styles/style.css') }}">
     {% block styles %}{% endblock %}
 </head>
-<body>
+<body class="dimmable blurring">
+<div class="ui page dimmer">
+    <div class="ui large text loader">Processing...</div>
+</div>
 {% block navbar %}
     <nav class="ui fixed menu inverted navbar">
-        <a href="#" class="brand item">Drone Anomaly Detection</a>
-        <a href="#" class="item" id="btnSimulateNewTrainingData">Simulate New Training Path</a>
+        <a href="#" class="brand item">Flight Path Anomaly Detection</a>
+        <a href="#" class="item" id="btnSimulateNewTrainingData">Simulate New Training Paths</a>
+        <a href="#" class="item" style="display:none;" id="btnSimulateAnomalyData">Simulate Anomalous Paths</a>
         <a href="#" class="item" style="display:none;" id="btnAnalyzeAnomaly">Analyze Anomaly</a>
         <a href="#" class="item" style="display:none;" id="btnToggleDataSheet">Toggle Data Sheet</a>
         <a href="#" class="item" style="display:none;" id="btnViewTopDown">View Top Down</a>
         <a href="#" class="item" style="display:none;" id="btnViewSide">View Side</a>
-        <a href="#" class="item" style="display:none;" id="btnViewDrone">View Drone</a>
+        <a href="#" class="item" style="display:none;" id="btnViewPlane">View Plane</a>
     </nav>
 {% endblock %}
 {% block content %}{% endblock %}
 
+
 <script src="{{ url_for('static',filename='vendor/jquery/dist/jquery.min.js') }}"></script>
-<script src="{{ url_for('static',filename='vendor/semantic-ui/dist/semantic.min.js') }}"></script>
+<script src="{{ url_for('static',filename='vendor/lodash/dist/lodash.core.min.js') }}"></script>
+<script src="{{ url_for('static',filename='vendor/semantic/dist/semantic.min.js') }}"></script>
+
+
 {% block scripts %}{% endblock %}
 </body>
 </html>

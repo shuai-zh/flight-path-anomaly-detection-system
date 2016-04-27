@@ -19,7 +19,7 @@ def simulate():
 @app.route('/analyze-anomaly', methods=['POST'])
 def analyze():
     flightPathCollection = request.get_json()
-    print flightPathCollection
+    # print flightPathCollection
     anomalyScoreCollection = runGeospatialAnomaly(flightPathCollection, verbose=True)
 
     return jsonify(result=anomalyScoreCollection)

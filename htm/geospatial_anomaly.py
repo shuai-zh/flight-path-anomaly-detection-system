@@ -67,7 +67,7 @@ def createModel(useTimeEncoders, scale, verbose):
 def runGeospatialAnomaly(preprocessedData,
                          scale=False,
                          useTimeEncoders=False,
-                         verbose=True):
+                         verbose=False):
     model = createModel(useTimeEncoders, scale, verbose)
 
     outputFormat = "%Y-%m-%dT%H:%M:%S"

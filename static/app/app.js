@@ -7,25 +7,30 @@ $(document).ready(function () {
         WIND_EFFECT_WEIGHT_ON_Z = 0.4,
         WIND_EFFECT_WEIGHT_ON_SPEED = 0.05;
 
-    var droneCruisingSpeed,
-        droneCruisingAltitude,
+    var planeCruisingSpeed,
+        planeCruisingAltitude,
         probabilityOfWindOnX,
         probabilityOfWindOnY,
         probabilityOfWindOnZ,
         maxWindSpeedOnX,
         maxWindSpeedOnY,
         maxWindSpeedOnZ,
+        numberOfPaths,
         firstPathStartTime,
         lastPathEndTime,
         startAndEndPoints = [],
-        droneAndPathCollection = [],
-        activeDroneAndPath,
-        flightPathCollection = [];
+        planeAndPathCollection = [],
+        activePlaneAndPath,
+        flightPathCollection = [],
+        airports;
 
     var pathList = $('#pathList');
     var btnSimulateNewTrainingData = $('#btnSimulateNewTrainingData');
-    var pageDimmer = $('#pageDimmer');
-    pageDimmer.dimmer({
+    var btnSimulateAnomalyData = $('#btnSimulateAnomalyData');
+
+    // initialize the dimmer
+    var body = $('body');
+    body.dimmer({
         closable: false
     });
 
@@ -46,7 +51,7 @@ $(document).ready(function () {
 
     //Use STK World Terrain
     viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
-        url: '//cesiumjs.org/stk-terrain/world',
+        url: 'https://assets.agi.com/stk-terrain/world',
         requestWaterMask: true,
         requestVertexNormals: true
     });
@@ -57,123 +62,302 @@ $(document).ready(function () {
     //Enable depth testing so things behind the terrain disappear.
     //scene.globe.depthTestAgainstTerrain = true;
 
+    // var dataSource = Cesium.GeoJsonDataSource.load('static/data/airports.geojson');
+    // viewer.dataSources.add(dataSource);
+    // // viewer.zoomTo(dataSource);
+    //
+    // dataSource.then(function (ds) {
+    //
+    //     var airportEntities = ds.entities.values;
+    //
+    //     for (var i = 0; i < airportEntities.length; i++) {
+    //         var entity = airportEntities[i];
+    //         entity.billboard = undefined;
+    //         entity.point = new Cesium.PointGraphics({
+    //             color: Cesium.Color.CRIMSON,
+    //             pixelSize: 5
+    //         });
+    //         entity.label = new Cesium.LabelGraphics({
+    //             text: entity.properties.name,
+    //             translucencyByDistance: new Cesium.NearFarScalar(1.5e2, 1.0, 5.0e5, 0.0)
+    //         });
+    //     }
+    // });
+
+    var dlFrom = $('#dlFrom'),
+        dlTo = $('#dlTo');
+
+    // load the airport data from geojson
+    $.getJSON('static/data/us_airports.geojson')
+        .done(function (data) {
+            airports = data;
+            // populate the from and to selects
+            var sortedFeatures = _.sortBy(data.features, function (el) {
+                return el.properties.city;
+            });
+            var options = [];
+
+            // options.push('<option value="">City - Airport</option>');
+            for (var i in sortedFeatures) {
+                options.push('<option value="',
+                    sortedFeatures[i].properties.id, '">',
+                    sortedFeatures[i].properties.city + ' - ' + sortedFeatures[i].properties.name, '</option>');
+            }
+            var optionsStr = options.join('');
+
+            dlFrom.html(optionsStr);
+            dlTo.html(optionsStr);
+
+            $('#dlFrom,#dlTo').dropdown();
+        });
+
 
     // bind event handlers
     btnSimulateNewTrainingData.click(function () {
         $('#modalSimulateConfig')
             .modal({
+                blurring: true,
                 closable: false
             })
             .modal('show');
     });
 
+    var fromAirport,
+        toAirport;
+
     $('#btnSimulate').click(function () {
         btnSimulateNewTrainingData.hide();
+        body.dimmer('show');
+
+        // clear up everything to a fresh start
+        entities.removeAll();
+        startAndEndPoints = [];
+        planeAndPathCollection = [];
+        flightPathCollection = [];
 
         // get configuration from user input
+        var selectedFromAirportId = dlFrom.val();
+        var selectedToAirportId = dlTo.val();
+
+
+        // get the coordinates of the from and to airports
+        for (var i in airports.features) {
+            var airport = airports.features[i];
+
+            if (!(fromAirport && toAirport)) {
+                if (airport.properties.id == selectedFromAirportId) {
+                    fromAirport = airport;
+                }
+
+                if (airport.properties.id == selectedToAirportId) {
+                    toAirport = airport;
+                }
+            } else {
+                break;
+            }
+        }
+
         var form = $('#simulationConfigurationForm');
-        droneCruisingSpeed = form.find('input[name="droneCruisingSpeed"]').val();
-        droneCruisingAltitude = form.find('input[name="droneCruisingAltitude"]').val();
+        planeCruisingSpeed = form.find('input[name="planeCruisingSpeed"]').val();
+        planeCruisingAltitude = form.find('input[name="planeCruisingAltitude"]').val();
         probabilityOfWindOnX = form.find('input[name="probabilityOfWindOnX"]').val();
         probabilityOfWindOnY = form.find('input[name="probabilityOfWindOnY"]').val();
         probabilityOfWindOnZ = form.find('input[name="probabilityOfWindOnZ"]').val();
         maxWindSpeedOnX = form.find('input[name="maxWindSpeedOnX"]').val();
         maxWindSpeedOnY = form.find('input[name="maxWindSpeedOnY"]').val();
         maxWindSpeedOnZ = form.find('input[name="maxWindSpeedOnZ"]').val();
+        numberOfPaths = form.find('input[name="numberOfPaths"]').val();
 
-        if (flightPathCollection.length == 0) {
-            // ask user to pick start and end point in the first time
-            var n = noty({
-                layout: 'centerRight',
-                text: 'Double click on the globe to pick start and end point.',
-                type: 'information',
-                timeout: 5000
-            });
+        var fromAirportCartesian = Cesium.Cartesian3.fromDegrees(fromAirport.geometry.coordinates[0], fromAirport.geometry.coordinates[1]);
+        var toAirportCartesian = Cesium.Cartesian3.fromDegrees(toAirport.geometry.coordinates[0], toAirport.geometry.coordinates[1]);
 
-            // select 2 points on the scene
-            var step = 0;
+        // add airport markers
+        addStartAndEndPointMarker(fromAirportCartesian, fromAirport.properties.name + ' - ' + fromAirport.properties.city);
+        addStartAndEndPointMarker(toAirportCartesian, toAirport.properties.name + ' - ' + toAirport.properties.city);
 
-            // add double click event handler for the cesium viewer
-            var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-
-            function onLeftDoubleClick(movement) {
-                var cartesian = viewer.camera.pickEllipsoid(movement.position, ellipsoid);
-                if (cartesian) {
-                    var entity = entities.add({
-                        position: cartesian,
-                        point: {
-                            pixelSize: 5,
-                            color: Cesium.Color.RED,
-                            outlineColor: Cesium.Color.WHITE,
-                            outlineWidth: 2
-                        },
-                        label: {
-                            font: '14pt monospace',
-                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                            outlineWidth: 2,
-                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                            pixelOffset: new Cesium.Cartesian2(0, -9)
-                        }
-                    });
-
-                    startAndEndPoints.push(cartesian);
-
-                    if (step === 0) {
-                        entity.label.text = 'Start Point';
-                    } else if (step === 1) {
-                        entity.label.text = 'End Point';
-                        handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
-                        simulatePath(startAndEndPoints[0], startAndEndPoints[1]);
-                        showMenuButtons();
-                        renderPathList();
-                        btnSimulateNewTrainingData.show();
-                        $('#btnToggleDataSheet').show();
-                        pathList.fadeIn();
-                    }
-                    step++;
-                }
-            }
-
-            handler.setInputAction(onLeftDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
-        } else {
-            // hide all drones, paths and vertices
-            showDroneAndPathInScene(-1);
-            // use the same start and end points as user picked in the first time to simulate a different path
-            simulatePath(startAndEndPoints[0], startAndEndPoints[1]);
-            btnSimulateNewTrainingData.show();
-            renderPathList();
-
-            // show analyze button once flightPathCollection has more than 3 paths
-            if (flightPathCollection.length > 1) {
-                $('#btnAnalyzeAnomaly').show();
-            }
+        for (var i = 0; i < numberOfPaths; i++) {
+            simulatePath(fromAirportCartesian, toAirportCartesian);
         }
+
+
+        showMenuButtons();
+        renderPathList();
+        showPlaneAndPathInScene(0);
+        btnSimulateAnomalyData.show();
+        $('#btnToggleDataSheet').show();
+        body.dimmer('hide');
+        pathList.fadeIn();
+
+        // zoom to the path
+        viewer.zoomTo(entities);
+
+        // if (flightPathCollection.length == 0) {
+        //     // ask user to pick start and end point in the first time
+        //     var n = noty({
+        //         layout: 'centerRight',
+        //         text: 'Double click on the globe to pick start and end point.',
+        //         type: 'information',
+        //         timeout: 5000
+        //     });
+        //
+        //     // select 2 points on the scene
+        //     var step = 0;
+        //
+        //     // add double click event handler for the cesium viewer
+        //     var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+        //
+        //     function onLeftDoubleClick(movement) {
+        //         var cartesian = viewer.camera.pickEllipsoid(movement.position, ellipsoid);
+        //         if (cartesian) {
+        //             var entity = entities.add({
+        //                 position: cartesian,
+        //                 point: {
+        //                     pixelSize: 5,
+        //                     color: Cesium.Color.RED,
+        //                     outlineColor: Cesium.Color.WHITE,
+        //                     outlineWidth: 2
+        //                 },
+        //                 label: {
+        //                     font: '14pt monospace',
+        //                     style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        //                     outlineWidth: 2,
+        //                     verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        //                     pixelOffset: new Cesium.Cartesian2(0, -9)
+        //                 }
+        //             });
+        //
+        //             startAndEndPoints.push(cartesian);
+        //
+        //             if (step === 0) {
+        //                 entity.label.text = 'Start Point';
+        //             } else if (step === 1) {
+        //                 entity.label.text = 'End Point';
+        //                 handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+        //                 simulatePath(startAndEndPoints[0], startAndEndPoints[1]);
+        //                 showMenuButtons();
+        //                 renderPathList();
+        //                 btnSimulateNewTrainingData.show();
+        //                 $('#btnToggleDataSheet').show();
+        //                 pathList.fadeIn();
+        //             }
+        //             step++;
+        //         }
+        //     }
+        //
+        //     handler.setInputAction(onLeftDoubleClick, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+        // } else {
+        //     // hide all planes, paths and vertices
+        //     showPlaneAndPathInScene(-1);
+        //     // use the same start and end points as user picked in the first time to simulate a different path
+        //     simulatePath(startAndEndPoints[0], startAndEndPoints[1]);
+        //     btnSimulateNewTrainingData.show();
+        //     renderPathList();
+        //
+        //     // show analyze button once flightPathCollection has more than 3 paths
+        //     if (flightPathCollection.length > 1) {
+        //         $('#btnAnalyzeAnomaly').show();
+        //     }
+        // }
     });
 
-    function showDroneAndPathInScene(indexToShow) {
-        for (x in droneAndPathCollection) {
-            var show = (indexToShow === -1 ? false : x === indexToShow);
-            droneAndPathCollection[x]['droneAndPath'].show = show;
-            flightPathCollection[x].show = show;
-            for (y in droneAndPathCollection[x]['vertices']) {
-                droneAndPathCollection[x]['vertices'][y].show = show;
-            }
+    btnSimulateAnomalyData.click(function () {
+        $('#modalAnomalousDataConfig')
+            .modal({
+                blurring: true,
+                closable: false
+            })
+            .modal('show');
+    });
 
-            if (x === indexToShow) {
-                activeDroneAndPath = droneAndPathCollection[x]['droneAndPath'];
+    // simulate anmalous flight paths
+    $('#btnSimulateAnomalousData').click(function () {
+        body.dimmer('show');
+
+        var form = $('#anomalousDataForm');
+        planeCruisingSpeed = form.find('input[name="planeCruisingSpeed"]').val();
+        planeCruisingAltitude = form.find('input[name="planeCruisingAltitude"]').val();
+        probabilityOfWindOnX = form.find('input[name="probabilityOfWindOnX"]').val();
+        probabilityOfWindOnY = form.find('input[name="probabilityOfWindOnY"]').val();
+        probabilityOfWindOnZ = form.find('input[name="probabilityOfWindOnZ"]').val();
+        maxWindSpeedOnX = form.find('input[name="maxWindSpeedOnX"]').val();
+        maxWindSpeedOnY = form.find('input[name="maxWindSpeedOnY"]').val();
+        maxWindSpeedOnZ = form.find('input[name="maxWindSpeedOnZ"]').val();
+        numberOfPaths = form.find('input[name="numberOfPaths"]').val();
+
+        var fromAirportCartesian = Cesium.Cartesian3.fromDegrees(fromAirport.geometry.coordinates[0], fromAirport.geometry.coordinates[1]);
+        var toAirportCartesian = Cesium.Cartesian3.fromDegrees(toAirport.geometry.coordinates[0], toAirport.geometry.coordinates[1]);
+
+        for (var i = 0; i < numberOfPaths; i++) {
+            simulatePath(fromAirportCartesian, toAirportCartesian);
+        }
+
+        renderPathList();
+        showPlaneAndPathInScene(-1);
+
+        body.dimmer('hide');
+
+
+        if (flightPathCollection.length > 1) {
+            $('#btnAnalyzeAnomaly').show();
+        }
+
+        // zoom to the path
+        viewer.zoomTo(entities);
+    });
+    function showPlaneAndPathInScene(indexToShow) {
+        if (indexToShow == -1) {
+            // show the last path
+            indexToShow = planeAndPathCollection.length - 1;
+        }
+        // remove previous entities
+        entities.removeAll();
+
+        // add back start and end point
+        if (startAndEndPoints) {
+            entities.add(startAndEndPoints[0]);
+            entities.add(startAndEndPoints[1]);
+        }
+
+        for (var x in planeAndPathCollection) {
+            var show = (indexToShow == -1 ? false : x == indexToShow);
+            // planeAndPathCollection[x].planeAndPath.show = show;
+            if (indexToShow == x) {
+                entities.add(planeAndPathCollection[x].planeAndPath);
+                for (var y in planeAndPathCollection[x].vertices) {
+                    // planeAndPathCollection[x].vertices[y].show = show;
+                    entities.add(planeAndPathCollection[x].vertices[y]);
+                }
+
+                activePlaneAndPath = planeAndPathCollection[x].planeAndPath;
 
                 //Set timeline to simulation bounds
-                viewer.timeline.zoomTo(droneAndPathCollection[x].droneAndPath.availability.start, droneAndPathCollection[x].droneAndPath.availability.stop);
+                var startTime = planeAndPathCollection[x].planeAndPath.availability.start;
+                var endTime = planeAndPathCollection[x].planeAndPath.availability.stop;
+
+                //Make sure viewer is at the desired time.
+                clock.startTime = startTime.clone();
+                clock.stopTime = endTime.clone();
+                clock.currentTime = startTime.clone();
+                clock.clockRange = Cesium.ClockRange.UNBOUNDED; //Loop at the end
+                clock.multiplier = 2;
+
+
+                //Set timeline to simulation bounds
+                viewer.timeline.zoomTo(startTime, endTime);
             }
+
+            flightPathCollection[x].show = show;
         }
 
         // sync the path list
         renderPathList();
+
+
     }
 
     $('#btnAnalyzeAnomaly').click(function () {
         console.log(flightPathCollection);
-        pageDimmer.dimmer('show');
+        body.dimmer('show');
         $.ajax({
             url: analyzeAnomalyUrl,
             method: 'POST',
@@ -187,13 +371,31 @@ $(document).ready(function () {
 
             // render anomaly data
             renderAnomalyData(data.result);
-            pageDimmer.dimmer('hide');
+            body.dimmer('hide');
         });
     });
 
+    function addStartAndEndPointMarker(cartesian, text) {
+        var marker = new Cesium.Entity({
+            position: cartesian,
+            point: {
+                color: Cesium.Color.RED,
+                pixelSize: 6
+            },
+            label: {
+                text: text,
+                pixelOffset: new Cesium.Cartesian2(0.0, -20.0),
+                font: '20px sans-serif'
+            }
+        });
+
+        startAndEndPoints.push(marker);
+        entities.add(marker);
+    }
+
     function renderAnomalyData(anomalyData) {
-        for (index in anomalyData) {
-            for (subIndex in anomalyData[index]) {
+        for (var index in anomalyData) {
+            for (var subIndex in anomalyData[index]) {
                 // skip the start, end point and set the color of the vertex
                 if (subIndex == 0 || subIndex == anomalyData[index].length - 1) {
                     continue;
@@ -201,8 +403,8 @@ $(document).ready(function () {
                 var anomalyScore = anomalyData[index][subIndex];
                 var hexColor = getGreenToRed(anomalyScore * 100);
 
-                var droneAndPath = droneAndPathCollection[index];
-                var vertex = droneAndPath.vertices[subIndex - 1];
+                var planeAndPath = planeAndPathCollection[index];
+                var vertex = planeAndPath.vertices[subIndex - 1];
                 vertex.point.color = Cesium.Color.fromCssColorString('#' + hexColor);
             }
         }
@@ -235,16 +437,16 @@ $(document).ready(function () {
         viewer.trackedEntity = undefined;
         viewer.zoomTo(viewer.entities, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(-90), Cesium.Math.toRadians(-15), 75000));
     });
-    $('#btnViewDrone').click(function () {
-        viewer.trackedEntity = activeDroneAndPath;
+    $('#btnViewPlane').click(function () {
+        viewer.trackedEntity = activePlaneAndPath;
     });
 
     function showMenuButtons() {
-        $('#btnViewTopDown,#btnViewSide,#btnViewDrone').show();
+        $('#btnViewTopDown,#btnViewSide,#btnViewPlane').show();
     }
 
     function hideMenuButtons() {
-        $('#btnViewTopDown,#btnViewSide,#btnViewDrone').hide();
+        $('#btnViewTopDown,#btnViewSide,#btnViewPlane').hide();
     }
 
     function getRandomArbitrary(min, max) {
@@ -289,13 +491,13 @@ $(document).ready(function () {
             windSpeedX: 0.0,
             windSpeedY: 0.0,
             windSpeedZ: 0.0,
-            droneSpeed: droneCruisingSpeed
+            planeSpeed: planeCruisingSpeed
         });
 
         // simulate way points in between
         for (var i = 1; i < granularity; i++) {
             var cartographic = ellipsoidGeodesic.interpolateUsingFraction(i / granularity);
-            cartographic.height = droneCruisingAltitude;
+            cartographic.height = planeCruisingAltitude;
 
             var cartesianPosition = Cesium.Ellipsoid.WGS84.cartographicToCartesian(cartographic);
 
@@ -326,8 +528,8 @@ $(document).ready(function () {
             cartesianPosition.y += windEffectOnY;
             cartesianPosition.z += windEffectOnZ;
 
-            // affect the drone speed on x and y
-            var speed = droneCruisingSpeed;
+            // affect the plane speed on x and y
+            var speed = planeCruisingSpeed;
             speed -= endPoint.x - startPoint.x == 0 ? 0 : windSpeedOnX * WIND_EFFECT_WEIGHT_ON_SPEED;
             speed -= endPoint.y - startPoint.y == 0 ? 0 : windSpeedOnY * WIND_EFFECT_WEIGHT_ON_SPEED;
 
@@ -336,7 +538,7 @@ $(document).ready(function () {
 
 
             var time = Cesium.JulianDate.addSeconds(startTime,
-                shortestPathDistance / droneCruisingSpeed * i / granularity,
+                shortestPathDistance / planeCruisingSpeed * i / granularity,
                 new Cesium.JulianDate());
 
             polylinePositions.addSample(time, cartesianPosition);
@@ -348,11 +550,11 @@ $(document).ready(function () {
                 windSpeedX: windSpeedOnX,
                 windSpeedY: windSpeedOnY,
                 windSpeedZ: windEffectOnZ,
-                droneSpeed: speed
+                planeSpeed: speed
             });
 
             // add vertices
-            var vertex = entities.add({
+            var vertex = new Cesium.Entity({
                 position: cartesianPosition,
                 point: {
                     pixelSize: 8,
@@ -365,7 +567,7 @@ $(document).ready(function () {
         }
 
         var endTime = Cesium.JulianDate.addSeconds(startTime,
-            shortestPathDistance / droneCruisingSpeed,
+            shortestPathDistance / planeCruisingSpeed,
             new Cesium.JulianDate());
         lastPathEndTime = endTime;
 
@@ -379,11 +581,11 @@ $(document).ready(function () {
             windSpeedX: 0.0,
             windSpeedY: 0.0,
             windSpeedZ: 0.0,
-            droneSpeed: droneCruisingSpeed
+            planeSpeed: planeCruisingSpeed
         });
 
         // create path
-        var droneAndPath = entities.add({
+        var planeAndPath = new Cesium.Entity({
             //Set the entity availability to the same interval as the simulation time.
             availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
                 start: startTime,
@@ -410,33 +612,22 @@ $(document).ready(function () {
             }
         });
 
-        droneAndPathCollection.push({droneAndPath: droneAndPath, vertices: vertices});
-        activeDroneAndPath = droneAndPath;
+        planeAndPathCollection.push({planeAndPath: planeAndPath, vertices: vertices});
+        // activePlaneAndPath = planeAndPath;
         // use LagrangePolynomialApproximation to interpolate
-        //drone.position.setInterpolationOptions({
-        //    interpolationDegree: 5,
-        //    interpolationAlgorithm: Cesium.LagrangePolynomialApproximation
-        //});
+        planeAndPath.position.setInterpolationOptions({
+            interpolationDegree: 5,
+            interpolationAlgorithm: Cesium.LagrangePolynomialApproximation
+        });
 
-        // track the drone
-        viewer.zoomTo(entities);
-
-        //Make sure viewer is at the desired time.
-        clock.startTime = firstPathStartTime ? firstPathStartTime : startTime.clone();
-        clock.stopTime = endTime.clone();
-        clock.currentTime = startTime.clone();
-        clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
-        clock.multiplier = 2;
+        // track the plane
         firstPathStartTime = startTime.clone();
-
-        //Set timeline to simulation bounds
-        viewer.timeline.zoomTo(startTime, endTime);
 
         // save the path into paths
         flightPathCollection.push({
             number: flightPathCollection.length,
             flightPath: flightPath,
-            show: true
+            show: false
         });
     }
 
@@ -445,9 +636,9 @@ $(document).ready(function () {
         $.get(pathListTemplatePath, function (template) {
             var rendered = Mustache.render(template, {paths: flightPathCollection});
             pathList.html(rendered);
-            pathList.find('.header').click(function () {
-                var index = this.getAttribute('data-index');
-                showDroneAndPathInScene(index);
+            pathList.find('.link.item').click(function () {
+                var index = $(this).find('.header').data('index');
+                showPlaneAndPathInScene(index);
             });
         });
 
