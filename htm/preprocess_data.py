@@ -39,7 +39,7 @@ def preprocess(flightPathCollection, verbose=False):
         sequence = []
         for trackPoint in record['flightPath']:
             timestamp = datetime.datetime.fromtimestamp(int(trackPoint['timestamp']) / 1e3)
-            # speed = float(trackPoint['droneSpeed'])
+            # speed = float(trackPoint['planeSpeed'])
 
             keep = True
 

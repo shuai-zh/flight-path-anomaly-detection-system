@@ -1,10 +1,7 @@
 # Problem definition
-Suppose you have flying drones and you want to monitor their progress toward their target destination. Design algorithms to detect anomaly in their flight path and issue corrections so the drone can arrive its target location. Study graph algorithms and machine learning techniques to solve this problem. This is an open question as to how to design and implement this.
+Suppose you have flying planes and you want to monitor their progress toward their target destination. Design algorithms to detect anomaly in their flight path and issue corrections so the plane can arrive its target location. Study graph algorithms and machine learning techniques to solve this problem. This is an open question as to how to design and implement this.
 
 # Background
-## Unmanned Aerial Vehicles (Drones)
-The UAV is an acronym for Unmanned Aerial Vehicle, which is an aircraft with no pilot on board. UAVs can be remote controlled aircraft (e.g. flown by a pilot at a ground control station) or can fly autonomously based on pre-programmed flight plans or more complex dynamic automation systems.
-
 ## Anomaly
 > a·nom·a·ly Something that deviates from what is standard, normal, or expected.
 
@@ -28,27 +25,27 @@ Cesium is a JavaScript library for creating 3D globes and 2D maps in a web brows
 
 # Approach
 There are three steps in solving this problem:
-* Simulate the drone flight path
+* Simulate the plane flight path
 * Analyze the flight path using HTM
 * Visualize the anomaly detection result
 
-## Drone path simulation
+## plane path simulation
 1. Let the user pick start and end points arbitrarily on the globe
 2. Calculate the ellipsoid geodesic(Great Circle) surface distance between the 2 points
 3. Calculate the granularity of waypoints to be generated
 4. Generate each waypoint on the 'Great Circle' and exert random wind influences on the position and instantaneous velocity of each waypoint 
-5. Repeat a number of times to generate several drone flight paths for the same start and end points
-6. Send the generated drone flight paths to server to analyze
+5. Repeat a number of times to generate several plane flight paths for the same start and end points
+6. Send the generated plane flight paths to server to analyze
 
-## Drone anomaly detection analysis
+## plane anomaly detection analysis
 1. Build the HTM Model with parameters (type as Cortical Learning Algorithm, inference type as Temporal Anomaly, encoder as Geospatial Coordinate Encoder, etc)
-2. Run the model with the drone flight paths data and calculate the anomaly score
+2. Run the model with the plane flight paths data and calculate the anomaly score
 3. Send back the anomaly scores to the client
 
 ## Anomaly detection visualization
-1. Calculate colors between red and green (green represents normal and red for abnormal) with the anomaly scores returned by the server
+1. Calculate colors between red and green (green represents normal and red for anomalous) with the anomaly scores returned by the server
 2. Render each waypoint with the calculated colors
-3. Render the drone animation for the flight paths
+3. Render the plane animation for the flight paths
 
 # Main technologies used in the application
 * [Nupic](https://github.com/numenta/nupic) and [nupic.geospatial](nupic.geospatial) as Cortical Learning Algorithm
@@ -59,12 +56,12 @@ There are three steps in solving this problem:
 # Conclusions
 After experiments and simulations with this application, I can now draw several conclusions:
 
-* The HTM as one of the implementations of CLA can help with drone flight path anomaly detection effectively with Geospatial Coordinate Encoder
+* The HTM as one of the implementations of CLA can help with plane flight path anomaly detection effectively with Geospatial Coordinate Encoder
 * For the same start and end points, the more history flight path data provided, the easier for the HTM algorithm to provide reasonable and intelligent results
-* The drone instantaneous velocities greatly influence the speed for the HTM algorithm to calculate the anomaly scores. As the increase in velocity will result in exponential increase in the generating time of a coordinate's SDR(Sparse Distribution Representations) 
+* The plane instantaneous velocities greatly influence the speed for the HTM algorithm to calculate the anomaly scores. As the increase in velocity will result in exponential increase in the generating time of a coordinate's SDR(Sparse Distribution Representations) 
 
 # Things could be done in the future
-* Terrain collision detection with terrain data and drone instantaneous altitudes
+* Terrain collision detection with terrain data and plane instantaneous altitudes
 * Enable real time anomaly detection with real time GPS data
 
 # References

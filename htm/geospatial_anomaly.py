@@ -81,7 +81,7 @@ def runGeospatialAnomaly(preprocessedData,
             timestamp = datetime.datetime.fromtimestamp(int(trackPoint['timestamp']) / 1e3)
             longitude = float(trackPoint['longitude'])
             latitude = float(trackPoint['latitude'])
-            speed = float(trackPoint['droneSpeed'])
+            speed = float(trackPoint['planeSpeed'])
             altitude = float(trackPoint['altitude'])
             # windSpeedX = float(trackPoint['windSpeedX'])
             # windSpeedY = float(trackPoint['windSpeedY'])

@@ -1,4 +1,4 @@
-# Drone Anomaly Detection
+# Flight Path Anomaly Detection
 
 ## Dependencies
 
