@@ -31,7 +31,7 @@ from nupic.frameworks.opf.modelfactory import ModelFactory
 import model_params
 
 
-ACCURACY_THRESHOLD = 80  # meters
+ACCURACY_THRESHOLD = 500  # meters
 
 
 def addTimeEncoders(params):

@@ -29,8 +29,8 @@ $(document).ready(function () {
     var btnSimulateAnomalyData = $('#btnSimulateAnomalyData');
 
     // initialize the dimmer
-    var body = $('body');
-    body.dimmer({
+
+    $('body .dimmer').dimmer({
         closable: false
     });
 
@@ -116,7 +116,7 @@ $(document).ready(function () {
     btnSimulateNewTrainingData.click(function () {
         $('#modalSimulateConfig')
             .modal({
-                blurring: true,
+                // blurring: false,
                 closable: false
             })
             .modal('show');
@@ -127,7 +127,7 @@ $(document).ready(function () {
 
     $('#btnSimulate').click(function () {
         btnSimulateNewTrainingData.hide();
-        body.dimmer('show');
+
 
         // clear up everything to a fresh start
         entities.removeAll();
@@ -185,7 +185,7 @@ $(document).ready(function () {
         showPlaneAndPathInScene(0);
         btnSimulateAnomalyData.show();
         $('#btnToggleDataSheet').show();
-        body.dimmer('hide');
+
         pathList.fadeIn();
 
         // zoom to the path
@@ -263,7 +263,7 @@ $(document).ready(function () {
     btnSimulateAnomalyData.click(function () {
         $('#modalAnomalousDataConfig')
             .modal({
-                blurring: true,
+                // blurring: true,
                 closable: false
             })
             .modal('show');
@@ -271,8 +271,6 @@ $(document).ready(function () {
 
     // simulate anmalous flight paths
     $('#btnSimulateAnomalousData').click(function () {
-        body.dimmer('show');
-
         var form = $('#anomalousDataForm');
         planeCruisingSpeed = form.find('input[name="planeCruisingSpeed"]').val();
         planeCruisingAltitude = form.find('input[name="planeCruisingAltitude"]').val();
@@ -293,8 +291,6 @@ $(document).ready(function () {
 
         renderPathList();
         showPlaneAndPathInScene(-1);
-
-        body.dimmer('hide');
 
 
         if (flightPathCollection.length > 1) {
@@ -356,8 +352,7 @@ $(document).ready(function () {
     }
 
     $('#btnAnalyzeAnomaly').click(function () {
-        console.log(flightPathCollection);
-        body.dimmer('show');
+        $('body .dimmer').dimmer('show');
         $.ajax({
             url: analyzeAnomalyUrl,
             method: 'POST',
@@ -365,13 +360,9 @@ $(document).ready(function () {
             dataType: "json",
             data: JSON.stringify(flightPathCollection)
         }).done(function (data) {
-            if (console && console.log) {
-                console.log("Sample of data:", data);
-            }
-
             // render anomaly data
             renderAnomalyData(data.result);
-            body.dimmer('hide');
+            $('body .dimmer').dimmer('hide');
         });
     });
 

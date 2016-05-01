@@ -20,7 +20,7 @@ def simulate():
 def analyze():
     flightPathCollection = request.get_json()
     # print flightPathCollection
-    anomalyScoreCollection = runGeospatialAnomaly(flightPathCollection, verbose=True)
+    anomalyScoreCollection = runGeospatialAnomaly(flightPathCollection, verbose=False)
 
     return jsonify(result=anomalyScoreCollection)
 
