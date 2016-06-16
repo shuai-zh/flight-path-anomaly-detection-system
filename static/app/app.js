@@ -51,7 +51,7 @@ $(document).ready(function () {
 
     //Use STK World Terrain
     viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
-        url: 'https://assets.agi.com/stk-terrain/world',
+        url: '//assets.agi.com/stk-terrain/world',
         requestWaterMask: true,
         requestVertexNormals: true
     });
