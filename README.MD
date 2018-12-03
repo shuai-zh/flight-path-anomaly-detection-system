@@ -7,10 +7,6 @@ You must have [NuPIC](https://github.com/numenta/nupic) installed. Please follow
 Now, use [pip](https://pip.pypa.io/en/latest/installing.html) to install the other python requirements for this application:
 
     pip install -r requirements.txt
-    
-And also install the [bower](http://bower.io/#install-bower) components:
-    
-    bower install
 
 ## Usage
 

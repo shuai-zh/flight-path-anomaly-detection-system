@@ -50,11 +50,7 @@ $(document).ready(function () {
     scene.globe.enableLighting = false;
 
     //Use STK World Terrain
-    viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
-        url: '//assets.agi.com/stk-terrain/world',
-        requestWaterMask: true,
-        requestVertexNormals: true
-    });
+    viewer.terrainProvider = Cesium.createWorldTerrain();
 
     //Set the random number seed for consistent results.
     Cesium.Math.setRandomNumberSeed(3);
@@ -488,7 +484,7 @@ $(document).ready(function () {
         // simulate way points in between
         for (var i = 1; i < granularity; i++) {
             var cartographic = ellipsoidGeodesic.interpolateUsingFraction(i / granularity);
-            cartographic.height = planeCruisingAltitude;
+            cartographic.height = parseInt(planeCruisingAltitude, 10);
 
             var cartesianPosition = Cesium.Ellipsoid.WGS84.cartographicToCartesian(cartographic);
 
@@ -577,6 +573,8 @@ $(document).ready(function () {
 
         // create path
         var planeAndPath = new Cesium.Entity({
+            name: 'airplane',
+            
             //Set the entity availability to the same interval as the simulation time.
             availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
                 start: startTime,

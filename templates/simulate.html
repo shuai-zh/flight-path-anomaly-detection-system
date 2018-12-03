@@ -213,10 +213,10 @@
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static',filename='lib/Cesium/Cesium.js') }}"></script>
-    <script src="{{ url_for('static',filename='vendor/noty/js/noty/packaged/jquery.noty.packaged.min.js') }}"></script>
-    <script src="{{ url_for('static',filename='vendor/mustache/mustache.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.0.1/mustache.min.js"></script>
     <script>
-        var aircraftModelPath = '{{ url_for('static',filename='lib/Cesium/Assets/Cesium_Air.gltf') }}';
+        var aircraftModelPath = '{{ url_for('static',filename='lib/Cesium/Assets/Cesium_Air.glb') }}';
         var startPointPath = '{{ url_for('static',filename='lib/Cesium/Assets/Textures/maki/airport.png') }}';
         var endPointPath = '{{ url_for('static',filename='lib/Cesium/Assets/Textures/maki/airfield.png') }}';
         var pathListTemplatePath = '{{ url_for('static',filename='templates/pathList.mst') }}';

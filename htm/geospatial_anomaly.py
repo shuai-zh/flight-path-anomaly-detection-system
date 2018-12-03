@@ -26,7 +26,7 @@ A simple client to create a CLA anomaly detection model for geospatial data.
 
 import datetime
 
-from nupic.frameworks.opf.modelfactory import ModelFactory
+from nupic.frameworks.opf.model_factory import ModelFactory
 
 import model_params
 
